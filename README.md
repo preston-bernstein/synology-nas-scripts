@@ -28,7 +28,7 @@ This script deletes the contents of the "unsorted" folder while keeping the fold
 
 ## License
 
-This repository is licensed under the MIT license. See the [LICENSE]('./LICENSE') file for more information.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
 
 ## Contributing
 
