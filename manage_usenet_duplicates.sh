@@ -3,11 +3,13 @@
 # Define paths
 MEDIA_DIR="/volume1/Media"
 DOWNLOADS_DIR="$MEDIA_DIR/Downloads"
+COMPLETE_DIR="$DOWNLOADS_DIR/Usenet/complete"
 MOVIES_DIR="$MEDIA_DIR/Movies"
 MUSIC_DIR="$MEDIA_DIR/Music"
 TV_SHOWS_DIR="$MEDIA_DIR/TV Shows"
 LOGS_DIR="$DOWNLOADS_DIR/Usenet/logs"
-LOG_FILE="$LOGS_DIR/manage_usenet_duplicates.log"
+TIMESTAMP=$(date '+%Y%m%d-%H%M%S')
+LOG_FILE="$LOGS_DIR/manage_usenet_duplicates_$TIMESTAMP.log"
 
 # Ensure logs directory exists
 mkdir -p "$LOGS_DIR"
@@ -161,17 +163,18 @@ remove_duplicates_in_target() {
 
 # Function to handle duplicates in the usenet complete folder
 handle_usenet_duplicates() {
-    local usenet_complete_dir="$1"
+    local complete_dir="$1"
 
     while IFS= read -r -d '' file; do
         remove_duplicates_in_target "$file" "$MOVIES_DIR"
         remove_duplicates_in_target "$file" "$TV_SHOWS_DIR"
-    done < <(find "$usenet_complete_dir" -type f -print0)
+        remove_duplicates_in_target "$file" "$MUSIC_DIR"
+    done < <(find "$complete_dir" -type f -print0)
 }
 
 # Function to consolidate duplicates across the usenet complete folder
 consolidate_usenet_duplicates() {
-    local usenet_complete_dir="$1"
+    local complete_dir="$1"
     declare -A file_map
 
     while IFS= read -r -d '' file; do
@@ -193,25 +196,23 @@ consolidate_usenet_duplicates() {
             log_message "$BLUE" "Keeping file: $file"
             file_map[$norm_file_name]="$file"
         fi
-    done < <(find "$usenet_complete_dir" -type f -print0)
+    done < <(find "$complete_dir" -type f -print0)
 }
 
 # Main function
 main() {
-    usenet_complete_dir="$DOWNLOADS_DIR/Usenet"
-
     # Check if the usenet complete directory exists
-    if [ ! -d "$usenet_complete_dir" ]; then
-        handle_error "Usenet complete directory '$usenet_complete_dir' not found."
+    if [ ! -d "$COMPLETE_DIR" ]; then
+        handle_error "Usenet complete directory '$COMPLETE_DIR' not found."
     fi
 
     log_message "$CYAN" "Starting usenet duplicates removal process."
 
     # Handle duplicates within the usenet complete folder
-    consolidate_usenet_duplicates "$usenet_complete_dir"
+    consolidate_usenet_duplicates "$COMPLETE_DIR"
 
-    # Check for duplicates in Movies and TV Shows
-    handle_usenet_duplicates "$usenet_complete_dir"
+    # Check for duplicates in Movies, TV Shows, and Music directories
+    handle_usenet_duplicates "$COMPLETE_DIR"
 
     log_message "$CYAN" "Usenet duplicates removal process completed."
 }
