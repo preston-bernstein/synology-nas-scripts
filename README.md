@@ -51,6 +51,32 @@ This script deletes all but the latest 30 log files in specified log directories
         /volume1/scripts/cleanup_logs.sh
         ```
 
+### `manage_usenet_duplicates.sh`
+
+This script searches the usenet complete folder, deletes all duplicates while leaving the highest quality files, consolidates the highest quality music tracks from each folder, and ensures removal of lower quality duplicates in Movies and TV Shows folders.
+
+**Usage:**
+
+1. Save the script to your Synology NAS, preferably in a directory like `/volume1/scripts`.
+2. Make the script executable by running the following command via SSH:
+   ```bash
+   chmod +x /volume1/scripts/manage_usenet_duplicates.sh
+   ```
+3. Ensure the folder structure is as follows:
+   - **`/volume1/Media/Downloads`**
+   - **`/volume1/Media/Movies`**
+   - **`/volume1/Media/Music`**
+   - **`/volume1/Media/TV Shows`**
+4. Schedule the script to run daily using Synology's Task Scheduler:
+   - Open Control Panel and navigate to Task Scheduler:
+   - Create a new Scheduled Task with the following settings:
+     - **General:** Name the task (e.g., "Manage Usenet Duplicates") and set the user to "automaton".
+     - **Schedule:** Set the frequency to "Daily" and the time to "00:00".
+     - **Task Settings:** Enter the path to your script:
+       ```bash
+       /volume1/scripts/manage_usenet_duplicates.sh
+       ```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
