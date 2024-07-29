@@ -30,7 +30,9 @@ get_audio_quality() {
 
 # Function to organize music files
 organize_music() {
+    log "${YELLOW}Starting to organize music files...${NC}"
     find "$COMPLETE_DIR" -type f -name "*.mp3" -or -name "*.flac" -or -name "*.m4a" | while read -r file; do
+        log "Processing music file: $file"
         artist=$(ffprobe -v error -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$file")
         album=$(ffprobe -v error -show_entries format_tags=album -of default=noprint_wrappers=1:nokey=1 "$file")
         title=$(ffprobe -v error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$file")
@@ -57,6 +59,7 @@ organize_music() {
 
             existing_file="$cd_dir/$(basename "$file")"
             if [ -f "$existing_file" ]; then
+                log "Comparing qualities of $file and $existing_file"
                 current_quality=$(get_audio_quality "$existing_file")
                 new_quality=$(get_audio_quality "$file")
                 if [ "$new_quality" -gt "$current_quality" ]; then
@@ -70,13 +73,17 @@ organize_music() {
                 mv "$file" "$cd_dir"
                 log "${GREEN}Moved $file to $cd_dir${NC}"
             fi
+        else
+            log "${RED}Missing metadata for $file, skipping...${NC}"
         fi
     done
 }
 
 # Function to organize TV shows
 organize_tvshows() {
+    log "${YELLOW}Starting to organize TV shows...${NC}"
     find "$COMPLETE_DIR" -type f -name "*.mp4" -or -name "*.mkv" | while read -r file; do
+        log "Processing TV show file: $file"
         show=$(ffprobe -v error -show_entries format_tags=show -of default=noprint_wrappers=1:nokey=1 "$file")
         season=$(ffprobe -v error -show_entries format_tags=season_number -of default=noprint_wrappers=1:nokey=1 "$file")
 
@@ -85,13 +92,17 @@ organize_tvshows() {
             mkdir -p "$season_dir"
             mv "$file" "$season_dir"
             log "${GREEN}Moved $file to $season_dir${NC}"
+        else
+            log "${RED}Missing metadata for $file, skipping...${NC}"
         fi
     done
 }
 
 # Function to organize movies
 organize_movies() {
+    log "${YELLOW}Starting to organize movies...${NC}"
     find "$COMPLETE_DIR" -type f -name "*.mp4" -or -name "*.mkv" | while read -r file; do
+        log "Processing movie file: $file"
         movie=$(ffprobe -v error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$file")
         year=$(ffprobe -v error -show_entries format_tags=date -of default=noprint_wrappers=1:nokey=1 "$file")
 
@@ -100,13 +111,17 @@ organize_movies() {
             mkdir -p "$movie_dir"
             mv "$file" "$movie_dir"
             log "${GREEN}Moved $file to $movie_dir${NC}"
+        else
+            log "${RED}Missing metadata for $file, skipping...${NC}"
         fi
     done
 }
 
 # Function to remove lower quality duplicates from the existing library
 remove_lower_quality_duplicates() {
+    log "${YELLOW}Starting to remove lower quality duplicates...${NC}"
     find "$MEDIA_DIR" -type f -name "*.mp3" -or -name "*.flac" -or -name "*.m4a" | while read -r file; do
+        log "Checking for duplicates of: $file"
         artist=$(ffprobe -v error -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$file")
         album=$(ffprobe -v error -show_entries format_tags=album -of default=noprint_wrappers=1:nokey=1 "$file")
         title=$(ffprobe -v error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$file")
@@ -133,6 +148,7 @@ remove_lower_quality_duplicates() {
 
             existing_file="$cd_dir/$(basename "$file")"
             if [ -f "$existing_file" ]; then
+                log "Comparing qualities of $file and $existing_file"
                 current_quality=$(get_audio_quality "$existing_file")
                 new_quality=$(get_audio_quality "$file")
                 if [ "$new_quality" -gt "$current_quality" ]; then
@@ -146,6 +162,8 @@ remove_lower_quality_duplicates() {
                 mv "$file" "$cd_dir"
                 log "${GREEN}Moved $file to $cd_dir${NC}"
             fi
+        else
+            log "${RED}Missing metadata for $file, skipping...${NC}"
         fi
     done
 }
