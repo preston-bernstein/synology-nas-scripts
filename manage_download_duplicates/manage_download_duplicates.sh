@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Create log directory if it doesn't exist
+LOG_DIR="/volume1/scripts/manage_download_duplicates/logs"
+mkdir -p "$LOG_DIR"
+
+# Generate a log file name with the current timestamp
+LOG_FILE="$LOG_DIR/manage_download_duplicates_$(date +'%Y%m%d_%H%M%S').log"
+
 # Ensure required tools are available
 command -v ffprobe >/dev/null 2>&1 || { echo >&2 "ffprobe is required but it's not installed. Aborting."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "jq is required but it's not installed. Aborting."; exit 1; }
@@ -9,7 +16,7 @@ command -v xargs >/dev/null 2>&1 || { echo >&2 "xargs is required but it's not i
 # Function to log messages with timestamps
 log() {
     local type="$1"; shift
-    echo -e "$(date +'%Y-%m-%d %H:%M:%S') [${type}] $*"
+    echo -e "$(date +'%Y-%m-%d %H:%M:%S') [${type}] $*" | tee -a "$LOG_FILE"
 }
 
 # Initialize counters
