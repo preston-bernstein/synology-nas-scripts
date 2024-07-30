@@ -4,14 +4,27 @@
 LOG_DIR="/volume1/scripts/manage_download_duplicates/logs"
 mkdir -p "$LOG_DIR"
 
+# Check if the log directory was created successfully
+if [[ ! -d "$LOG_DIR" ]]; then
+    echo "Log directory $LOG_DIR could not be created."
+    exit 1
+fi
+
 # Generate a log file name with the current timestamp
 LOG_FILE="$LOG_DIR/manage_download_duplicates_$(date +'%Y%m%d_%H%M%S').log"
 
+# Verify if the log file can be created
+touch "$LOG_FILE" 2>/dev/null
+if [[ ! -f "$LOG_FILE" ]]; then
+    echo "Log file $LOG_FILE could not be created."
+    exit 1
+fi
+
 # Ensure required tools are available
-command -v ffprobe >/dev/null 2>&1 || { echo >&2 "ffprobe is required but it's not installed. Aborting."; exit 1; }
-command -v jq >/dev/null 2>&1 || { echo >&2 "jq is required but it's not installed. Aborting."; exit 1; }
-command -v sha256sum >/dev/null 2>&1 || { echo >&2 "sha256sum is required but it's not installed. Aborting."; exit 1; }
-command -v xargs >/dev/null 2>&1 || { echo >&2 "xargs is required but it's not installed. Aborting."; exit 1; }
+command -v ffprobe >/dev/null 2>&1 || { echo "ffprobe is required but it's not installed. Aborting." | tee -a "$LOG_FILE"; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo "jq is required but it's not installed. Aborting." | tee -a "$LOG_FILE"; exit 1; }
+command -v sha256sum >/dev/null 2>&1 || { echo "sha256sum is required but it's not installed. Aborting." | tee -a "$LOG_FILE"; exit 1; }
+command -v xargs >/dev/null 2>&1 || { echo "xargs is required but it's not installed. Aborting." | tee -a "$LOG_FILE"; exit 1; }
 
 # Function to log messages with timestamps
 log() {
