@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set the PATH to include the directory where ffprobe is located
+export PATH=$PATH:/volume1/@appstore/ffmpeg/bin
+
 # Create log directory if it doesn't exist
 LOG_DIR="/volume1/scripts/manage_download_duplicates/logs"
 mkdir -p "$LOG_DIR"
@@ -137,7 +140,7 @@ is_similar_filename() {
         m = length(a)
         n = length(b)
         for (i = 0; i <= m; i++) d[i,0] = i
-        for (j = 0; j <= n; j++) d[0,j] = j
+        for (j = 0; i <= n; j++) d[0,j] = j
         for (i = 1; i <= m; i++) {
             for (j = 1; j <= n; j++) {
                 cost = (a[i] == b[j]) ? 0 : 1
@@ -170,7 +173,7 @@ process_music_file() {
             existing_metadata=$(get_metadata "$existing_file")
             normalized_existing_metadata=$(normalize_metadata "$existing_metadata")
 
-            if [[ "$normalized_metadata" == "$normalized_existing_metadata" ]]; then
+            if ([[ "$normalized_metadata" == "$normalized_existing_metadata" ]] && ! is_similar_filename "$file" "$existing_file")); then
                 log WARN "Duplicate music track found, deleting: $file"
                 rm -f "$file" || log ERROR "Failed to delete file: $file"
                 files_deleted=$((files_deleted + 1))
@@ -189,7 +192,7 @@ process_video_file() {
     local file="$1"
     local quality
     quality=$(get_quality "$file")
-    file_hash=$(get_file_hash "$file")
+    file_hash=$(get_file_hash("$file"))
 
     # Check for duplicates in the media folder
     for existing_file in /volume1/Media/*; do
